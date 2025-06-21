@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 
-const socket = io('https://disaster-response-platform-backend1.vercel.app');
+const socket = io('https://disaster-response-platform-1.onrender.com');
 
 export default function HomePage() {
   const [disasters, setDisasters] = useState([]);
