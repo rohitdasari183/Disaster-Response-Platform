@@ -24,7 +24,7 @@ const io = new Server(server, {
 
 app.use(cors(
   {
-    origin:[""],
+    origin:["disaster-response-platform-front.vercel.app"],
     methods:["POST","GET"],
     credentials:true
   }
