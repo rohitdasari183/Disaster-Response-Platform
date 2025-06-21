@@ -32,6 +32,10 @@ app.use(cors(
 app.use(express.json());
 
 // Routes
+app.get('/',(req,res)=>{
+  res.json("Welcome");
+}
+)
 app.use('/disasters', disasterRoutes(io));
 app.use('/social-media', socialRoutes(io));
 app.use('/resources', resourceRoutes(io));
