@@ -7,17 +7,22 @@ exports.createResource = async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  let location = null;
-
   try {
-    // Geocode with OpenStreetMap
+    // 🌍 Geocode location_name using OpenStreetMap
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location_name)}&format=json&limit=1`);
     const geoData = await geoRes.json();
 
-    if (geoData.length > 0) {
-      const { lat, lon } = geoData[0];
-      location = `SRID=4326;POINT(${lon} ${lat})`;
+    if (!geoData.length) {
+      return res.status(400).json({ error: 'Invalid location: not found' });
     }
+
+    const { lat, lon } = geoData[0];
+
+    // ✅ Convert to GeoJSON point (expected by Supabase/PostGIS)
+    const location = {
+      type: 'Point',
+      coordinates: [parseFloat(lon), parseFloat(lat)]
+    };
 
     const { data, error } = await supabase
       .from('resources')
@@ -30,11 +35,15 @@ exports.createResource = async (req, res) => {
       }])
       .select();
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error("❌ Supabase insert error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
     res.status(201).json(data[0]);
 
   } catch (err) {
-    console.error("❌ Resource insert error:", err.message);
+    console.error("❌ Resource insert crash:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
