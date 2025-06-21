@@ -1,4 +1,5 @@
 const supabase = require('../supabaseClient');
+const fetch = require('node-fetch'); // Only needed if using older Node versions
 
 exports.createResource = async (req, res) => {
   const { disaster_id, name, location_name, type } = req.body;
@@ -8,17 +9,17 @@ exports.createResource = async (req, res) => {
   }
 
   try {
-    // 🌍 Geocode location_name using OpenStreetMap
+    // 🌍 Geocode with OpenStreetMap
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location_name)}&format=json&limit=1`);
     const geoData = await geoRes.json();
 
     if (!geoData.length) {
-      return res.status(400).json({ error: 'Invalid location: not found' });
+      return res.status(400).json({ error: 'Invalid location: not found in OpenStreetMap' });
     }
 
     const { lat, lon } = geoData[0];
 
-    // ✅ Convert to GeoJSON point (expected by Supabase/PostGIS)
+    // ✅ GeoJSON format expected by Supabase for geography(Point)
     const location = {
       type: 'Point',
       coordinates: [parseFloat(lon), parseFloat(lat)]
@@ -41,9 +42,8 @@ exports.createResource = async (req, res) => {
     }
 
     res.status(201).json(data[0]);
-
   } catch (err) {
-    console.error("❌ Resource insert crash:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("❌ Server crash in createResource:", err.message);
+    res.status(500).json({ error: 'Internal server error: ' + err.message });
   }
 };
