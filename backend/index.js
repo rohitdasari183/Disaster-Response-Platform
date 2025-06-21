@@ -24,7 +24,7 @@ const io = new Server(server, {
 
 app.use(cors(
   {
-    origin:["disaster-response-platform-frontend-ten.vercel.app"],
+    origin:["https://disaster-response-platform-frontend-kappa.vercel.app"],
     methods:["POST","GET","PUT","DELETE"],
     credentials:true
   }
